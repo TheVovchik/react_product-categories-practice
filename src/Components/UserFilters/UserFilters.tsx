@@ -11,8 +11,8 @@ export const UserFilters: FC = () => {
   } = useContext(AppContext);
 
   const handleUserChoose = (currentUser: string) => {
-    filterByUser(currentUser);
     setChoosenUser(currentUser);
+    filterByUser(currentUser);
   };
 
   return (

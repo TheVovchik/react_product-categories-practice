@@ -1,4 +1,4 @@
-import React, { useState, useCallback } from 'react';
+import React, { useState } from 'react';
 import usersFromServer from '../../api/users';
 import productsFromServer from '../../api/products';
 import categoriesFromServer from '../../api/categories';
@@ -69,7 +69,7 @@ export const AppProvider: React.FC<Props> = ({ children }) => {
   const [choosenUser, setChoosenUser] = useState('all');
   const [choosenCategories, setChoosenCategories] = useState<string[]>(['all']);
 
-  const filterByUser = useCallback((user: string) => {
+  const filterByUser = (user: string) => {
     let currentGoods: Good[];
 
     if (user === 'all') {
@@ -90,15 +90,16 @@ export const AppProvider: React.FC<Props> = ({ children }) => {
     }
 
     setVisibleGoods(currentGoods);
-  }, []);
+  };
 
-  const filterByCategory = useCallback((filterState: string[]) => {
+  const filterByCategory = (filterState: string[]) => {
     let currentGoods: Good[];
 
     if (filterState[0] === 'all') {
       if (choosenUser === 'all') {
         currentGoods = productsList;
       } else {
+        console.log(choosenUser)
         currentGoods = productsList
           .filter(good => good.owner?.name === choosenUser)
           .filter(good => (good.categorie?.title
@@ -108,10 +109,13 @@ export const AppProvider: React.FC<Props> = ({ children }) => {
       setVisibleGoods(currentGoods);
     } else if (filterState[0] !== 'all') {
       if (choosenUser === 'all') {
+        console.log(choosenUser)
+
         currentGoods = productsList
           .filter(good => (good.categorie?.title
             && filterState.includes(good.categorie?.title)));
       } else {
+        console.log(choosenUser)
         currentGoods = productsList
           .filter(good => good.owner?.name === choosenUser)
           .filter(good => (good.categorie?.title
@@ -120,7 +124,7 @@ export const AppProvider: React.FC<Props> = ({ children }) => {
 
       setVisibleGoods(currentGoods);
     }
-  }, []);
+  };
 
   const contextValue = {
     users: usersFromServer,
