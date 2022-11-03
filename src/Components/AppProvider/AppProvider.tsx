@@ -34,6 +34,8 @@ const connectData = (products: Product[]) => {
   });
 };
 
+const tableHeader: string[] = ['ID', 'Product', 'Category', 'User'];
+
 const productsList = connectData(productsFromServer);
 
 type Props = {
@@ -41,6 +43,7 @@ type Props = {
 };
 
 type Context = {
+  table: string[],
   users: User[],
   categories: Category[],
   goods: Good[],
@@ -50,9 +53,14 @@ type Context = {
   setChoosenCategories: (categories: string[]) => void,
   query: string,
   setQuery: (newQuery: string) => void,
+  sortId: string,
+  setSortId: (newPos: string) => void,
+  sortCount: number,
+  setSortCount: (newNumber: number) => void,
 };
 
 export const AppContext = React.createContext<Context>({
+  table: tableHeader,
   users: usersFromServer,
   categories: categoriesFromServer,
   goods: productsList,
@@ -62,6 +70,10 @@ export const AppContext = React.createContext<Context>({
   setChoosenCategories: () => {},
   query: '',
   setQuery: () => {},
+  sortId: 'ID',
+  setSortId: () => {},
+  sortCount: 0,
+  setSortCount: () => {},
 });
 
 export const AppProvider: React.FC<Props> = ({ children }) => {
@@ -69,8 +81,77 @@ export const AppProvider: React.FC<Props> = ({ children }) => {
   const [choosenUser, setChoosenUser] = useState('all');
   const [choosenCategories, setChoosenCategories] = useState<string[]>(['all']);
   const [query, setQuery] = useState('');
+  const [sortId, setSortId] = useState('ID');
+  const [sortCount, setSortCount] = useState(0);
 
-  const filter = () => {
+  function filterByQuery(currentGoods: Good[]) {
+    return currentGoods
+      .filter(good => (
+        good.name.toLowerCase().includes(query.toLowerCase())));
+  }
+
+  function filterByUser(currentGoods: Good[]) {
+    return currentGoods
+      .filter(good => good.owner?.name === choosenUser);
+  }
+
+  function filterByCategory(currentGoods: Good[]) {
+    return currentGoods
+      .filter(good => (good.categorie?.title
+        && choosenCategories.includes(good.categorie.title)));
+  }
+
+  function sortGoods() {
+    if (sortId === 'ID') {
+      const newGoods = [...visibleGoods].sort((paramA: Good, paramB: Good) => {
+        return (sortCount === 0 || sortCount === 1)
+          ? paramA.id - paramB.id
+          : paramB.id - paramA.id;
+      });
+
+      setVisibleGoods(() => newGoods);
+    }
+
+    if (sortId === 'Product') {
+      const newGoods = [...visibleGoods].sort((paramA: Good, paramB: Good) => {
+        return (sortCount === 0 || sortCount === 1)
+          ? paramA.name.localeCompare(paramB.name)
+          : paramB.name.localeCompare(paramA.name);
+      });
+
+      setVisibleGoods(() => newGoods);
+    }
+
+    if (sortId === 'Category') {
+      const newGoods = [...visibleGoods].sort((paramA: Good, paramB: Good) => {
+        if (paramA.categorie?.title && paramB.categorie?.title) {
+          return (sortCount === 0 || sortCount === 1)
+            ? paramA.categorie?.title.localeCompare(paramB.categorie?.title)
+            : paramB.categorie?.title.localeCompare(paramA.categorie?.title);
+        }
+
+        return 0;
+      });
+
+      setVisibleGoods(() => newGoods);
+    }
+
+    if (sortId === 'User') {
+      const newGoods = [...visibleGoods].sort((paramA: Good, paramB: Good) => {
+        if (paramA.owner?.name && paramB.owner?.name) {
+          return (sortCount === 0 || sortCount === 1)
+            ? paramA.owner?.name.localeCompare(paramB.owner?.name)
+            : paramB.owner?.name.localeCompare(paramA.owner?.name);
+        }
+
+        return 0;
+      });
+
+      setVisibleGoods(() => newGoods);
+    }
+  }
+
+  const filterBy = () => {
     let currentGoods: Good[];
 
     if (choosenUser === 'all') {
@@ -78,43 +159,29 @@ export const AppProvider: React.FC<Props> = ({ children }) => {
         currentGoods = productsList;
 
         if (query !== '') {
-          currentGoods = currentGoods
-            .filter(good => (
-              good.name.toLowerCase().includes(query.toLowerCase())));
+          currentGoods = filterByQuery(currentGoods);
         }
       } else {
-        currentGoods = productsList
-          .filter(good => (good.categorie?.title
-          && choosenCategories.includes(good.categorie.title)));
+        currentGoods = filterByCategory(productsList);
 
         if (query !== '') {
-          currentGoods = currentGoods
-            .filter(good => (
-              good.name.toLowerCase().includes(query.toLowerCase())));
+          currentGoods = filterByQuery(currentGoods);
         }
       }
 
       setVisibleGoods(currentGoods);
     } else if (choosenUser !== 'all') {
       if (choosenCategories[0] === 'all') {
-        currentGoods = productsList
-          .filter(good => good.owner?.name === choosenUser);
+        currentGoods = filterByUser(productsList);
 
         if (query !== '') {
-          currentGoods = currentGoods
-            .filter(good => (
-              good.name.toLowerCase().includes(query.toLowerCase())));
+          currentGoods = filterByQuery(currentGoods);
         }
       } else {
-        currentGoods = productsList
-          .filter(good => (good.categorie?.title
-            && choosenCategories.includes(good.categorie.title)))
-          .filter(good => good.owner?.name === choosenUser);
+        currentGoods = filterByUser(filterByCategory(productsList));
 
         if (query !== '') {
-          currentGoods = currentGoods
-            .filter(good => (
-              good.name.toLowerCase().includes(query.toLowerCase())));
+          currentGoods = filterByQuery(currentGoods);
         }
       }
 
@@ -122,9 +189,23 @@ export const AppProvider: React.FC<Props> = ({ children }) => {
     }
   };
 
-  useEffect(filter, [choosenUser, choosenCategories, query]);
+  useEffect(filterBy,
+    [
+      choosenUser,
+      choosenCategories,
+      query,
+    ]);
+
+  useEffect(() => {
+    sortGoods();
+  },
+  [
+    sortId,
+    sortCount,
+  ]);
 
   const contextValue = {
+    table: tableHeader,
     users: usersFromServer,
     categories: categoriesFromServer,
     goods: visibleGoods,
@@ -134,6 +215,10 @@ export const AppProvider: React.FC<Props> = ({ children }) => {
     setChoosenCategories,
     query,
     setQuery,
+    sortId,
+    setSortId,
+    sortCount,
+    setSortCount,
   };
 
   return (

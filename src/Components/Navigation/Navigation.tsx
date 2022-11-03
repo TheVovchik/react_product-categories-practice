@@ -4,9 +4,24 @@ import { CategorySerch } from '../CategorySearch';
 import { UserFilters } from '../UserFilters';
 
 export const Navigation: FC = () => {
-  const { query, setQuery } = useContext(AppContext);
+  const {
+    query,
+    setQuery,
+    setChoosenCategories,
+    setChoosenUser,
+  } = useContext(AppContext);
   const handleInput = (event: React.ChangeEvent<HTMLInputElement>) => {
     setQuery(event.target.value);
+  };
+
+  const cleanInput = () => {
+    setQuery('');
+  };
+
+  const resetFilters = () => {
+    setQuery('');
+    setChoosenCategories(['all']);
+    setChoosenUser('all');
   };
 
   return (
@@ -31,14 +46,17 @@ export const Navigation: FC = () => {
             <i className="fas fa-search" aria-hidden="true" />
           </span>
 
-          <span className="icon is-right">
-            {/* eslint-disable-next-line jsx-a11y/control-has-associated-label */}
-            <button
-              data-cy="ClearButton"
-              type="button"
-              className="delete"
-            />
-          </span>
+          {query && (
+            <span className="icon is-right">
+              <button
+                aria-label="delete"
+                data-cy="ClearButton"
+                type="button"
+                className="delete"
+                onClick={cleanInput}
+              />
+            </span>
+          )}
         </p>
       </div>
 
@@ -49,7 +67,7 @@ export const Navigation: FC = () => {
           data-cy="ResetAllButton"
           href="#/"
           className="button is-link is-outlined is-fullwidth"
-
+          onClick={resetFilters}
         >
           Reset all filters
         </a>

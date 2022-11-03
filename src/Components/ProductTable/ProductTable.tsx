@@ -3,7 +3,33 @@ import classNames from 'classnames';
 import { AppContext } from '../AppProvider';
 
 export const ProductTable: FC = () => {
-  const { goods } = useContext(AppContext);
+  const {
+    table,
+    goods,
+    sortId,
+    setSortId,
+    sortCount,
+    setSortCount,
+  } = useContext(AppContext);
+
+  const handleSortBy = (current: string) => {
+    if (sortId !== current) {
+      setSortCount(1);
+      setSortId(current);
+    } else {
+      let next = sortCount + 1;
+
+      if (next > 2) {
+        next = 0;
+      }
+
+      setSortCount(next);
+
+      if (next === 0) {
+        setSortId('ID');
+      }
+    }
+  };
 
   return (
     <table
@@ -12,53 +38,38 @@ export const ProductTable: FC = () => {
     >
       <thead>
         <tr>
-          <th>
-            <span className="is-flex is-flex-wrap-nowrap">
-              ID
+          {table.map(header => {
+            const isPassive = sortId !== header || sortCount === 0;
+            const isUp = sortId === header && sortCount === 1;
+            const isDown = sortId === header && sortCount === 2;
 
-              <a href="#/">
-                <span className="icon">
-                  <i data-cy="SortIcon" className="fas fa-sort" />
+            return (
+              <th key={header}>
+                <span className="is-flex is-flex-wrap-nowrap">
+                  {header}
+
+                  <a
+                    href="#/"
+                    onClick={() => handleSortBy(header)}
+                  >
+                    <span className="icon">
+                      <i
+                        data-cy="SortIcon"
+                        className={classNames(
+                          'fas',
+                          {
+                            'fa-sort': isPassive,
+                            'fa-sort-up': isUp,
+                            'fa-sort-down': isDown,
+                          },
+                        )}
+                      />
+                    </span>
+                  </a>
                 </span>
-              </a>
-            </span>
-          </th>
-
-          <th>
-            <span className="is-flex is-flex-wrap-nowrap">
-              Product
-
-              <a href="#/">
-                <span className="icon">
-                  <i data-cy="SortIcon" className="fas fa-sort-down" />
-                </span>
-              </a>
-            </span>
-          </th>
-
-          <th>
-            <span className="is-flex is-flex-wrap-nowrap">
-              Category
-
-              <a href="#/">
-                <span className="icon">
-                  <i data-cy="SortIcon" className="fas fa-sort-up" />
-                </span>
-              </a>
-            </span>
-          </th>
-
-          <th>
-            <span className="is-flex is-flex-wrap-nowrap">
-              User
-
-              <a href="#/">
-                <span className="icon">
-                  <i data-cy="SortIcon" className="fas fa-sort" />
-                </span>
-              </a>
-            </span>
-          </th>
+              </th>
+            );
+          })}
         </tr>
       </thead>
 

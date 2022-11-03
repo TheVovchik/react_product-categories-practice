@@ -24,7 +24,7 @@ export const App: React.FC = () => {
             </p>
           )}
 
-          <ProductTable />
+          {!isNoGoods && <ProductTable />}
         </div>
       </div>
     </div>
