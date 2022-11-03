@@ -1,8 +1,14 @@
-import { FC } from 'react';
+import React, { FC, useContext } from 'react';
+import { AppContext } from '../AppProvider';
 import { CategorySerch } from '../CategorySearch';
 import { UserFilters } from '../UserFilters';
 
 export const Navigation: FC = () => {
+  const { query, setQuery } = useContext(AppContext);
+  const handleInput = (event: React.ChangeEvent<HTMLInputElement>) => {
+    setQuery(event.target.value);
+  };
+
   return (
     <nav className="panel">
       <p className="panel-heading">Filters</p>
@@ -17,7 +23,8 @@ export const Navigation: FC = () => {
             type="text"
             className="input"
             placeholder="Search"
-            // value="qwe"
+            value={query}
+            onChange={handleInput}
           />
 
           <span className="icon is-left">

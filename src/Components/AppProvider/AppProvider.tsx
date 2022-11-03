@@ -48,6 +48,8 @@ type Context = {
   setChoosenUser: (user: string) => void,
   choosenCategories: string[],
   setChoosenCategories: (categories: string[]) => void,
+  query: string,
+  setQuery: (newQuery: string) => void,
 };
 
 export const AppContext = React.createContext<Context>({
@@ -58,12 +60,15 @@ export const AppContext = React.createContext<Context>({
   setChoosenUser: () => {},
   choosenCategories: ['all'],
   setChoosenCategories: () => {},
+  query: '',
+  setQuery: () => {},
 });
 
 export const AppProvider: React.FC<Props> = ({ children }) => {
   const [visibleGoods, setVisibleGoods] = useState<Good[]>(productsList);
   const [choosenUser, setChoosenUser] = useState('all');
   const [choosenCategories, setChoosenCategories] = useState<string[]>(['all']);
+  const [query, setQuery] = useState('');
 
   const filter = () => {
     let currentGoods: Good[];
@@ -71,10 +76,22 @@ export const AppProvider: React.FC<Props> = ({ children }) => {
     if (choosenUser === 'all') {
       if (choosenCategories[0] === 'all') {
         currentGoods = productsList;
+
+        if (query !== '') {
+          currentGoods = currentGoods
+            .filter(good => (
+              good.name.toLowerCase().includes(query.toLowerCase())));
+        }
       } else {
         currentGoods = productsList
           .filter(good => (good.categorie?.title
           && choosenCategories.includes(good.categorie.title)));
+
+        if (query !== '') {
+          currentGoods = currentGoods
+            .filter(good => (
+              good.name.toLowerCase().includes(query.toLowerCase())));
+        }
       }
 
       setVisibleGoods(currentGoods);
@@ -82,18 +99,30 @@ export const AppProvider: React.FC<Props> = ({ children }) => {
       if (choosenCategories[0] === 'all') {
         currentGoods = productsList
           .filter(good => good.owner?.name === choosenUser);
+
+        if (query !== '') {
+          currentGoods = currentGoods
+            .filter(good => (
+              good.name.toLowerCase().includes(query.toLowerCase())));
+        }
       } else {
         currentGoods = productsList
           .filter(good => (good.categorie?.title
             && choosenCategories.includes(good.categorie.title)))
           .filter(good => good.owner?.name === choosenUser);
+
+        if (query !== '') {
+          currentGoods = currentGoods
+            .filter(good => (
+              good.name.toLowerCase().includes(query.toLowerCase())));
+        }
       }
 
       setVisibleGoods(currentGoods);
     }
   };
 
-  useEffect(filter, [choosenUser, choosenCategories]);
+  useEffect(filter, [choosenUser, choosenCategories, query]);
 
   const contextValue = {
     users: usersFromServer,
@@ -103,6 +132,8 @@ export const AppProvider: React.FC<Props> = ({ children }) => {
     setChoosenUser,
     choosenCategories,
     setChoosenCategories,
+    query,
+    setQuery,
   };
 
   return (
