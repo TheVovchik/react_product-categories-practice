@@ -80,16 +80,20 @@ export const AppProvider: React.FC<Props> = ({ children }) => {
           .filter(good => (good.categorie?.title
           && choosenCategories.includes(good.categorie.title)));
       }
-    } else if (choosenCategories[0] === 'all') {
-      currentGoods = productsList.filter(good => good.owner?.name === user);
-    } else {
-      currentGoods = productsList
-        .filter(good => (good.categorie?.title
-          && choosenCategories.includes(good.categorie.title)))
-        .filter(good => good.owner?.name === user);
-    }
 
-    setVisibleGoods(currentGoods);
+      setVisibleGoods(currentGoods);
+    } else if (user !== 'all') {
+      if (choosenCategories[0] === 'all') {
+        currentGoods = productsList.filter(good => good.owner?.name === user);
+      } else {
+        currentGoods = productsList
+          .filter(good => (good.categorie?.title
+            && choosenCategories.includes(good.categorie.title)))
+          .filter(good => good.owner?.name === user);
+      }
+
+      setVisibleGoods(currentGoods);
+    }
   };
 
   const filterByCategory = (filterState: string[]) => {
@@ -99,23 +103,17 @@ export const AppProvider: React.FC<Props> = ({ children }) => {
       if (choosenUser === 'all') {
         currentGoods = productsList;
       } else {
-        console.log(choosenUser)
         currentGoods = productsList
-          .filter(good => good.owner?.name === choosenUser)
-          .filter(good => (good.categorie?.title
-            && filterState.includes(good.categorie?.title)));
+          .filter(good => good.owner?.name === choosenUser);
       }
 
       setVisibleGoods(currentGoods);
     } else if (filterState[0] !== 'all') {
       if (choosenUser === 'all') {
-        console.log(choosenUser)
-
         currentGoods = productsList
           .filter(good => (good.categorie?.title
             && filterState.includes(good.categorie?.title)));
       } else {
-        console.log(choosenUser)
         currentGoods = productsList
           .filter(good => good.owner?.name === choosenUser)
           .filter(good => (good.categorie?.title
