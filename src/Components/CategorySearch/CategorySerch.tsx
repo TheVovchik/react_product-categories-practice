@@ -7,15 +7,12 @@ export const CategorySerch: FC = () => {
     categories,
     choosenCategories,
     setChoosenCategories,
-    filterByCategory,
   } = useContext(AppContext);
 
   const handleCategoryChange = (category: string) => {
     if (category === 'all') {
-      filterByCategory(['all']);
       setChoosenCategories(['all']);
     } else if (choosenCategories[0] === 'all') {
-      filterByCategory([category]);
       setChoosenCategories([category]);
     } else if (choosenCategories.includes(category)) {
       let newList = choosenCategories
@@ -25,12 +22,10 @@ export const CategorySerch: FC = () => {
         newList = ['all'];
       }
 
-      filterByCategory(newList);
       setChoosenCategories(newList);
     } else {
       const newList = [...choosenCategories, category];
 
-      filterByCategory(newList);
       setChoosenCategories(newList);
     }
   };

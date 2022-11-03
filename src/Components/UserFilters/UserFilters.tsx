@@ -5,14 +5,12 @@ import { AppContext } from '../AppProvider';
 export const UserFilters: FC = () => {
   const {
     users,
-    filterByUser,
     choosenUser,
     setChoosenUser,
   } = useContext(AppContext);
 
   const handleUserChoose = (currentUser: string) => {
     setChoosenUser(currentUser);
-    filterByUser(currentUser);
   };
 
   return (
